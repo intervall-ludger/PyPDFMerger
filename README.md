@@ -2,6 +2,8 @@
 
 `PyPDFMerger` is a simple PyQt5 application for merging multiple PDF files into a single PDF file. It provides drag-and-drop functionality for adding PDF files to the list and reordering them. Users can select specific pages from each PDF to include in the final output file.
 
+![](/assets/img.png)
+
 ### Getting Started
 To use PDF Merger, you will need to have Python 3 and the following libraries installed:
 - PyQt5
