@@ -120,7 +120,7 @@ class PyPDFMerger(QWidget):
 
         # Initialize the main window
         self.setWindowTitle("Py PDF Merger")
-        self.setGeometry(100, 100, 300, 800)
+        self.setGeometry(100, 100, 400, 800)
 
         # Create the widgets
         self.file_list = InteractiveQListDragAndDrop()
@@ -158,7 +158,7 @@ class PyPDFMerger(QWidget):
                     item.setIcon(
                         QIcon(get_pdf_thumbnail(file_path, page_num=page_num + 1))
                     )
-                    item.setText(os.path.basename(file_path) + f"\n page: {page_num}")
+                    item.setText(os.path.basename(file_path) + f"\n page: {page_num + 1}")
                     item.setData(Qt.UserRole, (file_path, page_num))
                     self.file_list.addItem(item)
 
