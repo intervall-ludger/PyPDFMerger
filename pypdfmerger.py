@@ -22,7 +22,27 @@ from PyQt5.QtWidgets import (
     QListView,
 )
 from pdf2image import convert_from_path
+from PyQt5.QtCore import QThread, pyqtSignal, pyqtSlot
+from PyQt5.QtWidgets import QApplication, QProgressDialog
 
+class PdfToIcon(QThread):
+    finished = pyqtSignal()
+    def __init__(self, window, pdfs):
+        super(PdfToIcon, self).__init__()
+        self.window = window
+        self.pdfs = pdfs
+
+    def run(self):
+        for file_path in self.pdfs:
+            for page_num in range(len(convert_from_path(file_path))):
+                item = QListWidgetItem()
+                item.setIcon(
+                    QIcon(get_pdf_thumbnail(file_path, page_num=page_num + 1))
+                )
+                item.setText(os.path.basename(file_path) + f"\n page: {page_num + 1}")
+                item.setData(Qt.UserRole, (file_path, page_num))
+                self.window.addItem(item)
+        self.finished.emit()
 
 class FileSelectDialog(QDialog):
     def __init__(self, parent=None):
@@ -152,15 +172,21 @@ class PyPDFMerger(QWidget):
         file_select_dialog = FileSelectDialog(self)
         if file_select_dialog.exec_():
             selected_files = file_select_dialog.get_selected_files()
-            for file_path in selected_files:
-                for page_num in range(len(convert_from_path(file_path))):
-                    item = QListWidgetItem()
-                    item.setIcon(
-                        QIcon(get_pdf_thumbnail(file_path, page_num=page_num + 1))
-                    )
-                    item.setText(os.path.basename(file_path) + f"\n page: {page_num + 1}")
-                    item.setData(Qt.UserRole, (file_path, page_num))
-                    self.file_list.addItem(item)
+            worker = PdfToIcon(self.file_list, selected_files)
+
+            loading = QProgressDialog("Loading...", None, 0, 0)
+            loading.setWindowTitle("PDF Reader")
+            loading.setCancelButton(None)
+            loading.setWindowModality(2)
+
+            worker.finished.connect(loading.close)
+
+            loading.show()
+
+            worker.start()
+
+            while worker.isRunning():
+                QApplication.processEvents()
 
     def remove_selected_item(self):
         # Remove the selected file from the list
@@ -208,7 +234,7 @@ class PyPDFMerger(QWidget):
 
 def get_pdf_thumbnail(file_path, page_num=1):
     # Convert the PDF file to a JPEG image using pdf2image
-    images = convert_from_path(file_path, dpi=150)
+    images = convert_from_path(file_path, dpi=50)
     img_bytes = io.BytesIO()
     if page_num <= len(images):
         images[page_num - 1].save(img_bytes, format="JPEG")
