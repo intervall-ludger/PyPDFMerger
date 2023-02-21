@@ -1,0 +1,17 @@
+[tool.poetry]
+name = "pypdfmerger"
+version = "0.1.0"
+description = ""
+authors = ["ludgerradke <radke@intervall.io>"]
+readme = "README.md"
+
+[tool.poetry.dependencies]
+python = "^3.10"
+pyqt5 = "^5.15.9"
+pypdf2 = "^3.0.1"
+pdf2image = "^1.16.2"
+
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
