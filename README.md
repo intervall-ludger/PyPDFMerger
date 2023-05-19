@@ -39,9 +39,9 @@ Once the application is running, you can add PDF files to the list by clicking t
 
 We've also added support for creating standalone executables for easy distribution and use. Using the PyInstaller tool, we have included a script that creates a standalone executable file (.exe). This standalone executable is a self-contained application - it does not require a Python environment on your computer and can be run like any other program.
 
-To use the standalone executable, navigate to the dist directory and run pypdfmerger.exe.
+You can download the standalone exe [here](/dist/pypdfmerger.exe).
 
-The application can also be installed in the traditional way, by running the InstallerSetup in Output and adding **PyPDFMerger** to your programs. If you want to uninstall it, you can do this directly as with other programs. 
+The application can also be installed in the traditional way, by running the [InstallerSetup](/Output/PyPDFMergerSetup.exe) in Output and adding **PyPDFMerger** to your programs. If you want to uninstall it, you can do this directly as with other programs. 
 
 ### Licence
 

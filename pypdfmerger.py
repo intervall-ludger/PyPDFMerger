@@ -2,29 +2,23 @@ import sys
 
 from PyPDF2 import PdfReader, PdfWriter
 from PyQt5.QtCore import Qt, QSize
+from PyQt5.QtCore import pyqtSignal
+from PyQt5.QtGui import QKeySequence, QIcon
 from PyQt5.QtWidgets import (
     QApplication,
     QProgressDialog,
     QWidget,
-    QVBoxLayout,
     QHBoxLayout,
     QFileDialog,
-    QPushButton,
     QMessageBox,
 )
-from PyQt5.QtGui import QKeySequence, QIcon
+from PyQt5.QtWidgets import QDialog, QListWidget, QVBoxLayout, QPushButton
+from PyQt5.QtWidgets import QListWidgetItem
 from PyQt5.QtWidgets import QShortcut
 
 from file_select_dialog import FileSelectDialog
 from interactive_list import InteractiveQListDragAndDrop
 from pdf_to_icon import PdfToIcon
-
-
-from PyQt5.QtWidgets import QListWidget
-
-from PyQt5.QtWidgets import QDialog, QListWidget, QVBoxLayout, QPushButton
-from PyQt5.QtWidgets import QListWidgetItem
-from PyQt5.QtCore import pyqtSignal
 
 
 class TrashCanDialog(QDialog):
@@ -72,7 +66,7 @@ class PyPDFMerger(QWidget):
         self.deleted_items = []
 
         self.remove_file_button = QPushButton("Delete")
-        self.trashcan_button = QPushButton("TrashCan")
+        self.trashcan_button = QPushButton("Trash")
         self.save_button = QPushButton("Save")
 
         self.add_files_button = QPushButton("Add Files")
