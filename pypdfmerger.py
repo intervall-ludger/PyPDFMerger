@@ -12,7 +12,7 @@ from PyQt5.QtWidgets import (
     QPushButton,
     QMessageBox,
 )
-from PyQt5.QtGui import QKeySequence
+from PyQt5.QtGui import QKeySequence, QIcon
 from PyQt5.QtWidgets import QShortcut
 
 from file_select_dialog import FileSelectDialog
@@ -127,6 +127,7 @@ class PyPDFMerger(QWidget):
 
 def main():
     app = QApplication(sys.argv)
+    app.setWindowIcon(QIcon("icon.ico"))
     pdf_merger = PyPDFMerger()
     pdf_merger.show()
     sys.exit(app.exec_())
