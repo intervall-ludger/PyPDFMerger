@@ -12,6 +12,8 @@ from PyQt5.QtWidgets import (
     QPushButton,
     QMessageBox,
 )
+from PyQt5.QtGui import QKeySequence
+from PyQt5.QtWidgets import QShortcut
 
 from file_select_dialog import FileSelectDialog
 from interactive_list import InteractiveQListDragAndDrop
@@ -51,6 +53,10 @@ class PyPDFMerger(QWidget):
         # Connect the signals and slots
         self.remove_file_button.clicked.connect(self.remove_selected_item)
         self.save_button.clicked.connect(self.save_file)
+
+        # Add a shortcut for the delete key
+        self.delete_shortcut = QShortcut(QKeySequence(Qt.Key_Delete), self)
+        self.delete_shortcut.activated.connect(self.remove_selected_item)
 
     def show_file_select_dialog(self):
         file_select_dialog = FileSelectDialog(self)
