@@ -9,7 +9,6 @@ from utils import get_pdf_thumbnail
 from PyPDF2 import PdfReader
 
 
-
 class PdfToIcon(QThread):
     finished = pyqtSignal()
 

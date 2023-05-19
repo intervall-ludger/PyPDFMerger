@@ -6,7 +6,9 @@ from pdf2image import convert_from_path
 
 def get_pdf_thumbnail(file_path, page_num=1):
     # Convert the PDF file to a JPEG image using pdf2image
-    images = convert_from_path(file_path, dpi=50, first_page=page_num, last_page=page_num)
+    images = convert_from_path(
+        file_path, dpi=50, first_page=page_num, last_page=page_num
+    )
     img_bytes = io.BytesIO()
     images[0].save(img_bytes, format="JPEG")
 
