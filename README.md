@@ -23,10 +23,10 @@ poetry install
 ````
 
 ### Usage
-To run PDF Merger, simply run the following command
+To run PDF Merger, simply run the following command:
 
 ````bash
-python pdf_merger.py
+python pypdfmerger.py
 ````
 
 or as executable file.
@@ -35,7 +35,13 @@ or as executable file.
 ./dist/pypdfmerger.exe
 ````
 
-Once the application is running, you can add PDF files to the list by clicking the "Add Files" button or dragging and dropping files onto the list. To select specific pages from each PDF to include in the final output file, simply click on the item in the list and select the desired page(s). You can reorder the items in the list by dragging and dropping them. Once you are ready to merge the PDF files, click the "Save" button and select a destination file for the new PDF.
+Once the application is running, you can add PDF files to the list by clicking the "Add Files" button or dragging and dropping files onto the list. You can rearrange the items in the list by dragging and dropping. The "Trash Can" button opens a dialog box where you can recover deleted items. Once you are ready to merge the PDF files, click the "Save" button and select a destination file for the new PDF.
+
+We've also added support for creating standalone executables for easy distribution and use. Using the PyInstaller tool, we have included a script that creates a standalone executable file (.exe). This standalone executable is a self-contained application - it does not require a Python environment on your computer and can be run like any other program.
+
+To use the standalone executable, navigate to the dist directory and run pypdfmerger.exe.
+
+The application can also be installed in the traditional way, by running the InstallerSetup in Output and adding **PyPDFMerger** to your programs. If you want to uninstall it, you can do this directly as with other programs. 
 
 ### Licence
 
