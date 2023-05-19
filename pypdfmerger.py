@@ -37,6 +37,9 @@ class PyPDFMerger(QWidget):
         self.add_files_button = QPushButton("Add Files")
         self.add_files_button.clicked.connect(self.show_file_select_dialog)
 
+        # Add a tooltip to the remove_file_button
+        self.remove_file_button.setToolTip("Press the 'Delete' key or click this button to remove an item.")
+
         # Create the layout
         self.horizontal_layout = QHBoxLayout()
         self.horizontal_layout.addWidget(self.file_list)
