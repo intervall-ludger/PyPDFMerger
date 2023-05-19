@@ -13,7 +13,7 @@ To use PDF Merger, you will need to have Python 3 and the following libraries in
 You can install the required libraries using pip:
 
 ````bash
-pip install PyQt5 PyPDF2 pdf2image
+pip install PyQt5 PyPDF2 pdf2image pymupdf
 ````
 
 or alternative with poetry:
