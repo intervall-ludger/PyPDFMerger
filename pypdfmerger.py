@@ -48,7 +48,7 @@ class TrashCanDialog(QDialog):
         self.layout.addWidget(self.restore_button)
         self.setLayout(self.layout)
 
-        self.deleted_items.setIconSize(QSize(128, 128))
+        self.deleted_items.setIconSize(QSize(164, 164))
 
     def restore_deleted_item(self):
         selected_item = self.deleted_items.takeItem(self.deleted_items.currentRow())
