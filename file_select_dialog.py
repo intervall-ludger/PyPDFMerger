@@ -11,6 +11,7 @@ from PyQt5.QtWidgets import (
     QVBoxLayout,
 )
 
+from PyQt5.QtCore import QStandardPaths
 
 class FileSelectDialog(QDialog):
     def __init__(self, parent=None):
@@ -18,6 +19,12 @@ class FileSelectDialog(QDialog):
 
         # Initialize the file selection dialog
         self.file_dialog = QFileDialog(self)
+        self.file_dialog.setFileMode(QFileDialog.ExistingFiles)
+        self.file_dialog.setNameFilter("PDF Files (*.pdf)")
+
+        # Set the starting directory to the user's home directory
+        home_directory = QStandardPaths.writableLocation(QStandardPaths.HomeLocation)
+        self.file_dialog.setDirectory(home_directory)
         self.file_dialog.setFileMode(QFileDialog.ExistingFiles)
         self.file_dialog.setNameFilter("PDF Files (*.pdf)")
 

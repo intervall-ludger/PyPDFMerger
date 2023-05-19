@@ -16,4 +16,4 @@ Source: "dist\pypdfmerger\*"; DestDir: "{app}"; Flags: ignoreversion recursesubd
 Name: "{group}\PyPDFMerger"; Filename: "{app}\pypdfmerger.exe"
 
 [Run]
-Filename: "{app}\pdf_merger.exe"; Description: "Launch PyPDFMerger"; Flags: nowait postinstall skipifsilent
+Filename: "{app}\pypdfmerger.exe"; Description: "Launch PyPDFMerger"; Flags: nowait postinstall skipifsilent
