@@ -1,6 +1,6 @@
 import io
 
-from PyQt5.QtGui import QPixmap
+from PyQt6.QtGui import QPixmap
 from pdf2image import convert_from_path
 
 

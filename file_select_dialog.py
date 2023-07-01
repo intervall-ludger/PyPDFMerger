@@ -1,7 +1,7 @@
 import os
 
-from PyQt5.QtCore import Qt
-from PyQt5.QtWidgets import (
+from PyQt6.QtCore import Qt
+from PyQt6.QtWidgets import (
     QDialog,
     QFileDialog,
     QHBoxLayout,
@@ -11,7 +11,7 @@ from PyQt5.QtWidgets import (
     QVBoxLayout,
 )
 
-from PyQt5.QtCore import QStandardPaths
+from PyQt6.QtCore import QStandardPaths
 
 class FileSelectDialog(QDialog):
     def __init__(self, parent=None):
@@ -19,13 +19,13 @@ class FileSelectDialog(QDialog):
 
         # Initialize the file selection dialog
         self.file_dialog = QFileDialog(self)
-        self.file_dialog.setFileMode(QFileDialog.ExistingFiles)
+        self.file_dialog.setFileMode(QFileDialog.FileMode.ExistingFiles)
         self.file_dialog.setNameFilter("PDF Files (*.pdf)")
 
         # Set the starting directory to the user's home directory
-        home_directory = QStandardPaths.writableLocation(QStandardPaths.HomeLocation)
+        home_directory = QStandardPaths.writableLocation(QStandardPaths.StandardLocation.HomeLocation)
         self.file_dialog.setDirectory(home_directory)
-        self.file_dialog.setFileMode(QFileDialog.ExistingFiles)
+        self.file_dialog.setFileMode(QFileDialog.FileMode.ExistingFiles)
         self.file_dialog.setNameFilter("PDF Files (*.pdf)")
 
         # Create the widgets
@@ -53,14 +53,14 @@ class FileSelectDialog(QDialog):
 
     def show_file_dialog(self):
         # Show the file selection dialog
-        if self.file_dialog.exec_():
+        if self.file_dialog.exec():
             # Add the selected files to the list
             selected_files = self.file_dialog.selectedFiles()
             for file_path in selected_files:
                 if file_path.endswith(".pdf"):
                     item = QListWidgetItem()
                     item.setText(os.path.basename(file_path))
-                    item.setData(Qt.UserRole, file_path)
+                    item.setData(Qt.ItemDataRole.UserRole, file_path)
                     self.file_list.addItem(item)
 
     def get_selected_files(self):
@@ -68,5 +68,5 @@ class FileSelectDialog(QDialog):
         file_paths = []
         for index in range(self.file_list.count()):
             item = self.file_list.item(index)
-            file_paths.append(item.data(Qt.UserRole))
+            file_paths.append(item.data(Qt.ItemDataRole.UserRole))
         return file_paths

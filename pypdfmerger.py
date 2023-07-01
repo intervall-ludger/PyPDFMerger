@@ -1,10 +1,10 @@
 import sys
 
 from PyPDF2 import PdfReader, PdfWriter
-from PyQt5.QtCore import Qt, QSize
-from PyQt5.QtCore import pyqtSignal
-from PyQt5.QtGui import QKeySequence, QIcon
-from PyQt5.QtWidgets import (
+from PyQt6.QtCore import Qt, QSize
+from PyQt6.QtCore import pyqtSignal
+from PyQt6.QtGui import QKeySequence, QIcon
+from PyQt6.QtWidgets import (
     QApplication,
     QProgressDialog,
     QWidget,
@@ -12,9 +12,9 @@ from PyQt5.QtWidgets import (
     QFileDialog,
     QMessageBox,
 )
-from PyQt5.QtWidgets import QDialog, QListWidget, QVBoxLayout, QPushButton
-from PyQt5.QtWidgets import QListWidgetItem
-from PyQt5.QtWidgets import QShortcut
+from PyQt6.QtWidgets import QDialog, QListWidget, QVBoxLayout, QPushButton
+from PyQt6.QtWidgets import QListWidgetItem
+from PyQt6.QtGui import QShortcut
 
 from file_select_dialog import FileSelectDialog
 from interactive_list import InteractiveQListDragAndDrop
@@ -94,7 +94,7 @@ class PyPDFMerger(QWidget):
         )
 
         # Add a shortcut for the delete key
-        self.delete_shortcut = QShortcut(QKeySequence(Qt.Key_Delete), self)
+        self.delete_shortcut = QShortcut(QKeySequence(Qt.Key.Key_Delete), self)
         self.delete_shortcut.activated.connect(self.remove_selected_item)
 
         # Set the main layout
@@ -109,7 +109,7 @@ class PyPDFMerger(QWidget):
     def show_trashcan_dialog(self):
         self.trashcan_dialog = TrashCanDialog(self.deleted_items, self)
         self.trashcan_dialog.item_restored.connect(self.restore_deleted_item)
-        self.trashcan_dialog.exec_()
+        self.trashcan_dialog.exec()
 
     def restore_deleted_item(self, item):
         # Search for the item in self.deleted_items by comparing text
@@ -121,14 +121,14 @@ class PyPDFMerger(QWidget):
 
     def show_file_select_dialog(self):
         file_select_dialog = FileSelectDialog(self)
-        if file_select_dialog.exec_():
+        if file_select_dialog.exec():
             selected_files = file_select_dialog.get_selected_files()
             worker = PdfToIcon(self.file_list, selected_files)
 
             loading = QProgressDialog("Loading...", None, 0, 0)
             loading.setWindowTitle("PDF Reader")
             loading.setCancelButton(None)
-            loading.setWindowModality(2)
+            loading.setWindowModality(Qt.WindowModality.ApplicationModal)
 
             worker.finished.connect(loading.close)
 
@@ -144,7 +144,7 @@ class PyPDFMerger(QWidget):
         writer = PdfWriter()
         for i in range(self.file_list.count()):
             page_item = self.file_list.item(i)
-            file_path, page_num = page_item.data(Qt.UserRole)
+            file_path, page_num = page_item.data(Qt.ItemDataRole.UserRole)
 
             with open(file_path, "rb") as f:
                 reader = PdfReader(f)
@@ -154,11 +154,11 @@ class PyPDFMerger(QWidget):
         # Open a file dialog to select a destination file for the new PDF
         file_dialog = QFileDialog(self)
         file_dialog.setNameFilter("PDF files (*.pdf)")
-        file_dialog.setAcceptMode(QFileDialog.AcceptSave)
+        file_dialog.setAcceptMode(QFileDialog.AcceptMode.AcceptSave)
         file_dialog.setDefaultSuffix("pdf")
-        file_dialog.setOption(QFileDialog.DontUseNativeDialog, True)
-        file_dialog.setFileMode(QFileDialog.AnyFile)
-        if file_dialog.exec_():
+        file_dialog.setOption(QFileDialog.Option.DontUseNativeDialog, True)
+        file_dialog.setFileMode(QFileDialog.FileMode.AnyFile)
+        if file_dialog.exec():
             # Get the selected file path and extension
             file_path = file_dialog.selectedFiles()[0]
             if not file_path.lower().endswith(".pdf"):
@@ -179,10 +179,11 @@ class PyPDFMerger(QWidget):
 
 def main():
     app = QApplication(sys.argv)
+    app.setStyle("Fusion")
     app.setWindowIcon(QIcon("icon.ico"))
     pdf_merger = PyPDFMerger()
     pdf_merger.show()
-    sys.exit(app.exec_())
+    sys.exit(app.exec())
 
 
 if __name__ == "__main__":

@@ -1,9 +1,9 @@
 import os
 
 from PyPDF2 import PdfReader
-from PyQt5.QtCore import QThread, pyqtSignal, Qt
-from PyQt5.QtGui import QIcon
-from PyQt5.QtWidgets import QListWidgetItem
+from PyQt6.QtCore import QThread, pyqtSignal, Qt
+from PyQt6.QtGui import QIcon
+from PyQt6.QtWidgets import QListWidgetItem
 
 from utils import get_pdf_thumbnail
 
@@ -24,6 +24,6 @@ class PdfToIcon(QThread):
                 item = QListWidgetItem()
                 item.setIcon(QIcon(get_pdf_thumbnail(file_path, page_num=page_num)))
                 item.setText(os.path.basename(file_path) + f"\n page: {page_num + 1}")
-                item.setData(Qt.UserRole, (file_path, page_num))
+                item.setData(Qt.ItemDataRole.UserRole, (file_path, page_num))
                 self.window.addItem(item)
         self.finished.emit()
