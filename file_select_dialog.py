@@ -11,20 +11,25 @@ from PyQt6.QtWidgets import (
     QVBoxLayout,
 )
 
-from PyQt6.QtCore import QStandardPaths
+from PyQt6.QtCore import QStandardPaths, QSettings
 
 class FileSelectDialog(QDialog):
     def __init__(self, parent=None):
         super().__init__(parent)
+
+        self.settings = QSettings("PyPDFMerger", "FileSelectDialog")
 
         # Initialize the file selection dialog
         self.file_dialog = QFileDialog(self)
         self.file_dialog.setFileMode(QFileDialog.FileMode.ExistingFiles)
         self.file_dialog.setNameFilter("PDF Files (*.pdf)")
 
-        # Set the starting directory to the user's home directory
-        home_directory = QStandardPaths.writableLocation(QStandardPaths.StandardLocation.HomeLocation)
-        self.file_dialog.setDirectory(home_directory)
+        # Set the starting directory to the user's last directory with fallback home directory
+        last_directory = self.settings.value("lastDirectory",
+                                             QStandardPaths.writableLocation(
+                                                 QStandardPaths.StandardLocation.HomeLocation))
+
+        self.file_dialog.setDirectory(last_directory)
         self.file_dialog.setFileMode(QFileDialog.FileMode.ExistingFiles)
         self.file_dialog.setNameFilter("PDF Files (*.pdf)")
 
@@ -50,6 +55,12 @@ class FileSelectDialog(QDialog):
         # Set the main layout
         self.setLayout(self.vertical_layout)
         self.show_file_dialog()
+
+        self.save_last_directory()
+
+    def save_last_directory(self):
+        directory = self.file_dialog.directory()
+        self.settings.setValue("lastDirectory", directory.path())
 
     def show_file_dialog(self):
         # Show the file selection dialog
