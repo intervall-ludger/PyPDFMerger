@@ -34,10 +34,9 @@ or as executable file.
 ````bash
 ./dist/pypdfmerger.exe
 ````
+**or use the traditional installer setup under windows.** (see for this below)
 
 Once the application is running, you can add PDF files to the list by clicking the "Add Files" button or dragging and dropping files onto the list. You can rearrange the items in the list by dragging and dropping. The "Trash Can" button opens a dialog box where you can recover deleted items. Once you are ready to merge the PDF files, click the "Save" button and select a destination file for the new PDF.
-
-We've also added support for creating standalone executables for easy distribution and use. Using the PyInstaller tool, we have included a script that creates a standalone executable file (.exe). This standalone executable is a self-contained application - it does not require a Python environment on your computer and can be run like any other program.
 
 You can download the standalone exe [here](/dist/pypdfmerger.exe).
 
