@@ -1,6 +1,9 @@
-from PyQt6.QtCore import QSize
+from PyQt6.QtCore import QSize, Qt
 from PyQt6.QtWidgets import QListWidget, QAbstractItemView, QListView
 from pathlib import Path
+from PyQt6.QtCore import QByteArray, QBuffer, QIODevice
+from PyQt6.QtGui import QImage
+from utils import get_page_size
 
 class InteractiveQListDragAndDrop(QListWidget):
     def __init__(self, parent=None, main_window=None):
@@ -18,6 +21,24 @@ class InteractiveQListDragAndDrop(QListWidget):
         self.setResizeMode(QListWidget.ResizeMode.Adjust)
         self.setDropIndicatorShown(True)
         self.main_window = main_window
+
+        self.itemEntered.connect(self.show_large_icon)
+        self.viewport().setAttribute(Qt.WidgetAttribute.WA_Hover, True)
+        self.setMouseTracking(True)
+
+    def show_large_icon(self, item):
+        if item.icon():
+            width, height = get_page_size()
+            pixmap = item.icon().pixmap(QSize(width, height))
+            image = pixmap.toImage()
+            byte_array = QByteArray()
+            buffer = QBuffer(byte_array)
+            buffer.open(QIODevice.OpenModeFlag.WriteOnly)
+            image.save(buffer, "PNG")
+            base64_data = byte_array.toBase64()
+            item.setToolTip(f'<img src="data:image/png;base64,{base64_data.data().decode()}">')
+        else:
+            item.setToolTip('')
 
     def dragEnterEvent(self, event):
         if event.mimeData().hasUrls():
