@@ -10,7 +10,8 @@ def get_pdf_thumbnail(file_path, page_num=0):  # PyMuPDF uses zero-based page nu
 
     # Render the page to a pixmap, scale it, and get the image data
     pix = page.get_pixmap(
-        matrix=fitz.Matrix(2.5, 2.5)
+        matrix=fitz.Matrix(1, 1),
+        dpi=100
     )  # Adjust the matrix values to scale the image
     img_data = pix.tobytes("jpeg")
 
