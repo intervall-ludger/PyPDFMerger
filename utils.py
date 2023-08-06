@@ -1,9 +1,20 @@
 import fitz
 import screeninfo
 from PyQt6.QtGui import QPixmap
+from typing import Tuple
 
 
-def get_pdf_thumbnail(file_path, page_num=0):  # PyMuPDF uses zero-based page numbering
+def get_pdf_thumbnail(file_path: str, page_num: int = 0) -> QPixmap:
+    """
+    Generate a thumbnail of a specific page in a PDF file.
+
+    Args:
+        file_path (str): The path to the PDF file.
+        page_num (int, optional): The page number to generate a thumbnail for. Defaults to 0.
+
+    Returns:
+        QPixmap: The QPixmap object of the thumbnail.
+    """
     # Open the PDF file with PyMuPDF
     doc = fitz.open(file_path)
     page = doc.load_page(page_num)
@@ -21,7 +32,13 @@ def get_pdf_thumbnail(file_path, page_num=0):  # PyMuPDF uses zero-based page nu
     return qimg
 
 
-def get_start_size():
+def get_start_size() -> Tuple[int, int, int, int]:
+    """
+    Get the start size for the application window.
+
+    Returns:
+        Tuple[int, int, int, int]: A tuple containing the x, y, width, and height of the window.
+    """
     monitor_info = screeninfo.get_monitors()[0]
     return (
         100,
@@ -31,7 +48,13 @@ def get_start_size():
     )
 
 
-def get_page_size():
+def get_page_size() -> Tuple[int, int]:
+    """
+    Get the size of the page.
+
+    Returns:
+        Tuple[int, int]: A tuple containing the width and height of the page.
+    """
     # A4 - 210 x 297
     monitor_info = screeninfo.get_monitors()[0]
     size_ = int(0.6 * monitor_info.height)
