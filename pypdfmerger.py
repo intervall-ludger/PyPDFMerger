@@ -21,6 +21,7 @@ from interactive_list import InteractiveQListDragAndDrop
 from pdf_to_icon import PdfToIcon
 from utils import get_start_size
 
+
 class TrashCanDialog(QDialog):
     item_restored = pyqtSignal(QListWidgetItem)
 
@@ -129,21 +130,21 @@ class PyPDFMerger(QWidget):
             self.upload_pdfs(selected_files)
 
     def upload_pdfs(self, files):
-            worker = PdfToIcon(self.file_list, files)
+        worker = PdfToIcon(self.file_list, files)
 
-            loading = QProgressDialog("Loading...", None, 0, 0)
-            loading.setWindowTitle("PDF Reader")
-            loading.setCancelButton(None)
-            loading.setWindowModality(Qt.WindowModality.ApplicationModal)
+        loading = QProgressDialog("Loading...", None, 0, 0)
+        loading.setWindowTitle("PDF Reader")
+        loading.setCancelButton(None)
+        loading.setWindowModality(Qt.WindowModality.ApplicationModal)
 
-            worker.finished.connect(loading.close)
+        worker.finished.connect(loading.close)
 
-            loading.show()
+        loading.show()
 
-            worker.start()
+        worker.start()
 
-            while worker.isRunning():
-                QApplication.processEvents()
+        while worker.isRunning():
+            QApplication.processEvents()
 
     def save_file(self):
         # Create a PdfFileWriter object and add the pages from the selected PDF files in the new order

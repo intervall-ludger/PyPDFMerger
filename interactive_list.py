@@ -5,6 +5,7 @@ from PyQt6.QtCore import QByteArray, QBuffer, QIODevice
 from PyQt6.QtGui import QImage
 from utils import get_page_size
 
+
 class InteractiveQListDragAndDrop(QListWidget):
     def __init__(self, parent=None, main_window=None):
         super().__init__(parent)
@@ -36,9 +37,11 @@ class InteractiveQListDragAndDrop(QListWidget):
             buffer.open(QIODevice.OpenModeFlag.WriteOnly)
             image.save(buffer, "PNG")
             base64_data = byte_array.toBase64()
-            item.setToolTip(f'<img src="data:image/png;base64,{base64_data.data().decode()}">')
+            item.setToolTip(
+                f'<img src="data:image/png;base64,{base64_data.data().decode()}">'
+            )
         else:
-            item.setToolTip('')
+            item.setToolTip("")
 
     def dragEnterEvent(self, event):
         if event.mimeData().hasUrls():
@@ -52,7 +55,7 @@ class InteractiveQListDragAndDrop(QListWidget):
             pdf_files = []
             for url in urls:
                 file_path = Path(url.path()[1:])
-                if file_path.suffix == '.pdf':
+                if file_path.suffix == ".pdf":
                     pdf_files.append(file_path.as_posix())
             if len(pdf_files) > 0:
                 self.main_window.upload_pdfs(pdf_files)

@@ -13,6 +13,7 @@ from PyQt6.QtWidgets import (
 
 from PyQt6.QtCore import QStandardPaths, QSettings
 
+
 class FileSelectDialog(QDialog):
     def __init__(self, parent=None):
         super().__init__(parent)
@@ -25,9 +26,12 @@ class FileSelectDialog(QDialog):
         self.file_dialog.setNameFilter("PDF Files (*.pdf)")
 
         # Set the starting directory to the user's last directory with fallback home directory
-        last_directory = self.settings.value("lastDirectory",
-                                             QStandardPaths.writableLocation(
-                                                 QStandardPaths.StandardLocation.HomeLocation))
+        last_directory = self.settings.value(
+            "lastDirectory",
+            QStandardPaths.writableLocation(
+                QStandardPaths.StandardLocation.HomeLocation
+            ),
+        )
 
         self.file_dialog.setDirectory(last_directory)
         self.file_dialog.setFileMode(QFileDialog.FileMode.ExistingFiles)
