@@ -63,7 +63,7 @@ class PyPDFMerger(QWidget):
         self.setGeometry(geometry[0], geometry[1], geometry[2], geometry[3])
 
         # Create the widgets
-        self.file_list = InteractiveQListDragAndDrop()
+        self.file_list = InteractiveQListDragAndDrop(main_window=self)
 
         # Define a list to store the deleted items
         self.deleted_items = []
@@ -126,7 +126,10 @@ class PyPDFMerger(QWidget):
         file_select_dialog = FileSelectDialog(self)
         if file_select_dialog.exec():
             selected_files = file_select_dialog.get_selected_files()
-            worker = PdfToIcon(self.file_list, selected_files)
+            self.upload_pdfs(selected_files)
+
+    def upload_pdfs(self, files):
+            worker = PdfToIcon(self.file_list, files)
 
             loading = QProgressDialog("Loading...", None, 0, 0)
             loading.setWindowTitle("PDF Reader")

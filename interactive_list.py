@@ -1,9 +1,9 @@
 from PyQt6.QtCore import QSize
 from PyQt6.QtWidgets import QListWidget, QAbstractItemView, QListView
-
+from pathlib import Path
 
 class InteractiveQListDragAndDrop(QListWidget):
-    def __init__(self, parent=None):
+    def __init__(self, parent=None, main_window=None):
         super().__init__(parent)
         self.setDragEnabled(True)
         self.setAcceptDrops(True)
@@ -17,6 +17,7 @@ class InteractiveQListDragAndDrop(QListWidget):
         self.setIconSize(QSize(164, 164))
         self.setResizeMode(QListWidget.ResizeMode.Adjust)
         self.setDropIndicatorShown(True)
+        self.main_window = main_window
 
     def dragEnterEvent(self, event):
         if event.mimeData().hasUrls():
@@ -27,8 +28,14 @@ class InteractiveQListDragAndDrop(QListWidget):
     def dropEvent(self, event):
         if event.mimeData().hasUrls():
             urls = event.mimeData().urls()
-            # Handle dropping of URLs (e.g. images)
-            # ...
+            pdf_files = []
+            for url in urls:
+                file_path = Path(url.path()[1:])
+                if file_path.suffix == '.pdf':
+                    pdf_files.append(file_path.as_posix())
+            if len(pdf_files) > 0:
+                self.main_window.upload_pdfs(pdf_files)
+
         else:
             super().dropEvent(event)
 
