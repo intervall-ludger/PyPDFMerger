@@ -1,8 +1,8 @@
 [Setup]
 AppId={{3F96B359-E707-4242-42B0-427B28D4242A}}
 AppName=PyPDFMerger
-AppVersion=1.0
-;AppVerName=Image Converter 1.0
+AppVersion=1.2
+;AppVerName=PDF Merger
 AppPublisher=Karl Ludger Radke
 DefaultDirName={pf}\PyPDFMerger
 DefaultGroupName=PyPDFMerger
@@ -23,7 +23,7 @@ Source: "dist\pypdfmerger\*"; DestDir: "{app}"; Flags: ignoreversion recursesubd
 ; NOTE: Don't use "Flags: ignoreversion" on any shared system files
 
 [Icons]
-Name: "{group}\PyPFMerger"; Filename: "{app}\ImageConverter.exe"
+Name: "{group}\PyPFMerger"; Filename: "{app}\pypdfmerger.exe"
 Name: "{commondesktop}\PyPDFMerger"; Filename: "{app}\pypdfmerger.exe"; Tasks: desktopicon
 
 [Run]
