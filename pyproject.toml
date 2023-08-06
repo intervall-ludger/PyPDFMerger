@@ -12,6 +12,7 @@ pdf2image = "^1.16.2"
 pyinstaller = "^5.11.0"
 pymupdf = "^1.22.3"
 pyqt6 = "^6.5.1"
+screeninfo = "^0.8.1"
 
 
 [build-system]
