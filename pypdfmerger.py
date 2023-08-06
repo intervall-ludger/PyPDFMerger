@@ -19,7 +19,7 @@ from PyQt6.QtGui import QShortcut
 from file_select_dialog import FileSelectDialog
 from interactive_list import InteractiveQListDragAndDrop
 from pdf_to_icon import PdfToIcon
-
+from utils import get_start_size
 
 class TrashCanDialog(QDialog):
     item_restored = pyqtSignal(QListWidgetItem)
@@ -28,7 +28,8 @@ class TrashCanDialog(QDialog):
         super(TrashCanDialog, self).__init__(parent)
 
         self.setWindowTitle("TrashCan")
-        self.setGeometry(100, 100, 400, 800)
+        geometry = get_start_size()
+        self.setGeometry(geometry[0] + 400, geometry[1], geometry[2], geometry[3])
 
         self.deleted_items = QListWidget()
         for item in deleted_items:
@@ -57,7 +58,9 @@ class PyPDFMerger(QWidget):
 
         # Initialize the main window
         self.setWindowTitle("Py PDF Merger")
-        self.setGeometry(100, 100, 400, 800)
+
+        geometry = get_start_size()
+        self.setGeometry(geometry[0], geometry[1], geometry[2], geometry[3])
 
         # Create the widgets
         self.file_list = InteractiveQListDragAndDrop()

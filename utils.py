@@ -2,7 +2,7 @@ import io
 
 from PyQt6.QtGui import QPixmap
 from pdf2image import convert_from_path
-
+import screeninfo
 
 import fitz
 
@@ -20,3 +20,6 @@ def get_pdf_thumbnail(file_path, page_num=0):  # PyMuPDF uses zero-based page nu
     qimg.loadFromData(img_data, "JPEG")
     return qimg
 
+def get_start_size():
+    monitor_info = screeninfo.get_monitors()[0]
+    return 100, min(100, int(0.9 * monitor_info.height)), min(400, monitor_info.width), min(800, int(0.9 * monitor_info.height))
