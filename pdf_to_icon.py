@@ -16,9 +16,10 @@ class PdfToIcon(QThread):
     Attributes:
         finished (pyqtSignal): Signal emitted when the thread finishes.
     """
+
     finished = pyqtSignal()
 
-    def __init__(self, window: 'QListWidget', pdfs: List[str]):
+    def __init__(self, window: "QListWidget", pdfs: List[str]):
         """
         Initialize the PdfToIcon thread.
 

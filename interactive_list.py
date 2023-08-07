@@ -1,13 +1,22 @@
-from PyQt6.QtCore import QSize, Qt
-from PyQt6.QtWidgets import QListWidget, QAbstractItemView, QListView
 from pathlib import Path
+
 from PyQt6.QtCore import QByteArray, QBuffer, QIODevice
-from PyQt6.QtGui import QImage
+from PyQt6.QtCore import QSize, Qt
+from PyQt6.QtGui import QDropEvent, QDragEnterEvent
+from PyQt6.QtWidgets import QListWidget, QAbstractItemView, QListWidgetItem
+
 from utils import get_page_size
 
 
 class InteractiveQListDragAndDrop(QListWidget):
     def __init__(self, parent=None, main_window=None):
+        """
+        Initialize an InteractiveQListDragAndDrop instance.
+
+        Args:
+            parent (QWidget): The parent widget. Defaults to None.
+            main_window (Optional[QWidget]): The main window widget. Defaults to None.
+        """
         super().__init__(parent)
         self.setDragEnabled(True)
         self.setAcceptDrops(True)
@@ -23,11 +32,17 @@ class InteractiveQListDragAndDrop(QListWidget):
         self.setDropIndicatorShown(True)
         self.main_window = main_window
 
-        self.itemEntered.connect(self.show_large_icon)
+        self.itemEntered.connect(self.show_preview)
         self.viewport().setAttribute(Qt.WidgetAttribute.WA_Hover, True)
         self.setMouseTracking(True)
 
-    def show_large_icon(self, item):
+    def show_preview(self, item: QListWidgetItem):
+        """
+        Show page preview.
+
+        Args:
+            item (QListWidgetItem): The item for which to show the page preview.
+        """
         if item.icon():
             width, height = get_page_size()
             pixmap = item.icon().pixmap(QSize(width, height))
@@ -43,16 +58,28 @@ class InteractiveQListDragAndDrop(QListWidget):
         else:
             item.setToolTip("")
 
-    def dragEnterEvent(self, event):
+    def dragEnterEvent(self, event: QDragEnterEvent):
+        """
+        Event triggered when a drag operation enters the widget.
+
+        Args:
+            event (QDragEnterEvent): The drag enter event.
+        """
         if event.mimeData().hasUrls():
             event.accept()
         else:
             super().dragEnterEvent(event)
 
-    def dropEvent(self, event):
+    def dropEvent(self, event: QDropEvent):
+        """
+        Event triggered when a drop operation occurs on the widget.
+
+        Args:
+            event (QDropEvent): The drop event.
+        """
         if event.mimeData().hasUrls():
             urls = event.mimeData().urls()
-            pdf_files = []
+            pdf_files: List[str] = []
             for url in urls:
                 file_path = Path(url.path()[1:])
                 if file_path.suffix == ".pdf":

@@ -21,8 +21,7 @@ def get_pdf_thumbnail(file_path: str, page_num: int = 0) -> QPixmap:
 
     # Render the page to a pixmap, scale it, and get the image data
     pix = page.get_pixmap(
-        matrix=fitz.Matrix(1, 1),
-        dpi=100
+        matrix=fitz.Matrix(1, 1), dpi=100
     )  # Adjust the matrix values to scale the image
     img_data = pix.tobytes("jpeg")
 
