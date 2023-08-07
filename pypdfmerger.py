@@ -30,7 +30,8 @@ class TrashCanDialog(QDialog):
     Provides the ability to restore deleted items.
     """
 
-    item_restored: pyqtSignal[QListWidgetItem] = pyqtSignal(QListWidgetItem)
+    # item_restored: pyqtSignal[QListWidgetItem] = pyqtSignal(QListWidgetItem)
+    item_restored = pyqtSignal(QListWidgetItem)
 
     def __init__(
         self, deleted_items: List[QListWidgetItem], parent: Optional[QWidget] = None
