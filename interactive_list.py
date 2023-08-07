@@ -4,6 +4,8 @@ from PyQt6.QtCore import QByteArray, QBuffer, QIODevice
 from PyQt6.QtCore import QSize, Qt
 from PyQt6.QtGui import QDropEvent, QDragEnterEvent
 from PyQt6.QtWidgets import QListWidget, QAbstractItemView, QListWidgetItem
+from PyQt6.QtCore import Qt, QRect
+from PyQt6.QtGui import QPainter, QPixmap, QFont, QFontMetrics
 
 from utils import get_page_size
 
@@ -35,6 +37,33 @@ class InteractiveQListDragAndDrop(QListWidget):
         self.itemEntered.connect(self.show_preview)
         self.viewport().setAttribute(Qt.WidgetAttribute.WA_Hover, True)
         self.setMouseTracking(True)
+        originalPixmap = QPixmap('drag_and_drop.png')  # Load the icon you want to display
+        self.emptyListPixmap = originalPixmap.scaled(QSize(100, 100), Qt.AspectRatioMode.KeepAspectRatio)
+
+    def paintEvent(self, event):
+        super().paintEvent(event)
+
+        if not self.count():  # If the list is empty
+            qp = QPainter(self.viewport())
+            qp.setPen(Qt.GlobalColor.lightGray)
+            qp.setFont(QFont('Sans', 12, QFont.Weight.Bold))
+
+            # Draw the icon in the middle of the widget
+            pixmap_rect = QRect(0, 0, self.emptyListPixmap.width(), self.emptyListPixmap.height())
+            pixmap_rect.moveCenter(self.rect().center())
+            qp.drawPixmap(pixmap_rect, self.emptyListPixmap)
+
+            # Draw the text
+            fm = QFontMetrics(qp.font())
+            text = "Drag and Drop your pdf files here \n or use the add files button"
+            text_width = fm.horizontalAdvance(text)
+            text_rect = QRect(0, 0, text_width, 2 * fm.height())
+            text_rect.moveCenter(self.rect().center())
+            text_rect.moveTop(pixmap_rect.bottom() + 10)  # Move it just below the icon
+
+            qp.drawText(text_rect, Qt.AlignmentFlag.AlignCenter, text)
+
+            qp.end()
 
     def show_preview(self, item: QListWidgetItem):
         """
