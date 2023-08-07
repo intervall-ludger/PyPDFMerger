@@ -6,7 +6,7 @@ from PyQt6.QtGui import QDropEvent, QDragEnterEvent
 from PyQt6.QtWidgets import QListWidget, QAbstractItemView, QListWidgetItem
 from PyQt6.QtCore import Qt, QRect
 from PyQt6.QtGui import QPainter, QPixmap, QFont, QFontMetrics
-
+from typing import List
 from utils import get_page_size
 
 
