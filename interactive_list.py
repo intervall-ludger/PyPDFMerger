@@ -1,5 +1,6 @@
 from pathlib import Path
-
+import sys
+import os
 from PyQt6.QtCore import QByteArray, QBuffer, QIODevice
 from PyQt6.QtCore import QSize, Qt
 from PyQt6.QtGui import QDropEvent, QDragEnterEvent
@@ -37,7 +38,13 @@ class InteractiveQListDragAndDrop(QListWidget):
         self.itemEntered.connect(self.show_preview)
         self.viewport().setAttribute(Qt.WidgetAttribute.WA_Hover, True)
         self.setMouseTracking(True)
-        originalPixmap = QPixmap('drag_and_drop.png')  # Load the icon you want to display
+
+        if getattr(sys, 'frozen', False) and hasattr(sys, '_MEIPASS'):
+            bundle_dir = sys._MEIPASS
+        else:
+            bundle_dir = os.path.dirname(os.path.abspath(__file__))
+
+        originalPixmap = QPixmap(os.path.join(bundle_dir, 'drag_and_drop.png')) # Load the icon you want to display
         self.emptyListPixmap = originalPixmap.scaled(QSize(100, 100), Qt.AspectRatioMode.KeepAspectRatio)
 
     def paintEvent(self, event):
