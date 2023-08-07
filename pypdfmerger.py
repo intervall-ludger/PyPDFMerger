@@ -1,9 +1,9 @@
 import sys
+from typing import List, Optional
 
 from PyPDF2 import PdfReader, PdfWriter
-from PyQt6.QtCore import Qt, QSize
-from PyQt6.QtCore import pyqtSignal
-from PyQt6.QtGui import QKeySequence, QIcon
+from PyQt6.QtCore import Qt, QSize, pyqtSignal
+from PyQt6.QtGui import QKeySequence, QIcon, QShortcut
 from PyQt6.QtWidgets import (
     QApplication,
     QProgressDialog,
@@ -11,10 +11,12 @@ from PyQt6.QtWidgets import (
     QHBoxLayout,
     QFileDialog,
     QMessageBox,
+    QDialog,
+    QListWidget,
+    QVBoxLayout,
+    QPushButton,
+    QListWidgetItem,
 )
-from PyQt6.QtWidgets import QDialog, QListWidget, QVBoxLayout, QPushButton
-from PyQt6.QtWidgets import QListWidgetItem
-from PyQt6.QtGui import QShortcut
 
 from file_select_dialog import FileSelectDialog
 from interactive_list import InteractiveQListDragAndDrop
@@ -23,9 +25,23 @@ from utils import get_start_size
 
 
 class TrashCanDialog(QDialog):
-    item_restored = pyqtSignal(QListWidgetItem)
+    """
+    A dialog representing a trash can where deleted items are temporarily stored.
+    Provides the ability to restore deleted items.
+    """
 
-    def __init__(self, deleted_items, parent=None):
+    item_restored: pyqtSignal[QListWidgetItem] = pyqtSignal(QListWidgetItem)
+
+    def __init__(
+        self, deleted_items: List[QListWidgetItem], parent: Optional[QWidget] = None
+    ) -> None:
+        """
+        Initialize the TrashCanDialog.
+
+        Args:
+            deleted_items (List[QListWidgetItem]): List of items that were deleted.
+            parent (Optional[QWidget], optional): Parent widget. Defaults to None.
+        """
         super(TrashCanDialog, self).__init__(parent)
 
         self.setWindowTitle("TrashCan")
@@ -46,7 +62,10 @@ class TrashCanDialog(QDialog):
 
         self.deleted_items.setIconSize(QSize(164, 164))
 
-    def restore_deleted_item(self):
+    def restore_deleted_item(self) -> None:
+        """
+        Restore the selected deleted item and close the dialog.
+        """
         selected_item = self.deleted_items.takeItem(self.deleted_items.currentRow())
         if selected_item:
             self.item_restored.emit(selected_item.clone())
@@ -54,7 +73,10 @@ class TrashCanDialog(QDialog):
 
 
 class PyPDFMerger(QWidget):
-    def __init__(self):
+    """Main widget for the Py PDF Merger application."""
+
+    def __init__(self) -> None:
+        """Initialize the PyPDFMerger widget."""
         super().__init__()
 
         # Initialize the main window
@@ -78,6 +100,7 @@ class PyPDFMerger(QWidget):
 
         self.remove_file_button.clicked.connect(self.remove_selected_item)
         self.trashcan_button.clicked.connect(self.show_trashcan_dialog)
+        self.save_button.clicked.connect(self.save_file)
 
         # Create the layout
         self.horizontal_layout = QHBoxLayout()
@@ -89,8 +112,6 @@ class PyPDFMerger(QWidget):
         self.vertical_layout.addWidget(self.remove_file_button)
         self.vertical_layout.addWidget(self.trashcan_button)
         self.vertical_layout.addWidget(self.save_button)
-
-        self.save_button.clicked.connect(self.save_file)
 
         # Add a tooltip to the remove_file_button
         self.remove_file_button.setToolTip(
@@ -104,18 +125,25 @@ class PyPDFMerger(QWidget):
         # Set the main layout
         self.setLayout(self.vertical_layout)
 
-    def remove_selected_item(self):
-        # Remove the selected file from the list and add it to the deleted items list
+    def remove_selected_item(self) -> None:
+        """Remove the selected item from the file list."""
         selected_item = self.file_list.takeItem(self.file_list.currentRow())
         if selected_item:
             self.deleted_items.append(selected_item)
 
-    def show_trashcan_dialog(self):
+    def show_trashcan_dialog(self) -> None:
+        """Open the trash can dialog to view and potentially restore deleted items."""
         self.trashcan_dialog = TrashCanDialog(self.deleted_items, self)
         self.trashcan_dialog.item_restored.connect(self.restore_deleted_item)
         self.trashcan_dialog.exec()
 
-    def restore_deleted_item(self, item):
+    def restore_deleted_item(self, item) -> None:
+        """
+        Restore a deleted item to the file list.
+
+        Args:
+            item: The item to restore.
+        """
         # Search for the item in self.deleted_items by comparing text
         for deleted_item in self.deleted_items:
             if deleted_item.text() == item.text():
@@ -123,16 +151,23 @@ class PyPDFMerger(QWidget):
                 self.deleted_items.remove(deleted_item)
                 break
 
-    def show_file_select_dialog(self):
+    def show_file_select_dialog(self) -> None:
+        """Open the file selection dialog."""
         file_select_dialog = FileSelectDialog(self)
         if file_select_dialog.exec():
             selected_files = file_select_dialog.get_selected_files()
             self.upload_pdfs(selected_files)
 
-    def upload_pdfs(self, files):
+    def upload_pdfs(self, files: List[str]) -> None:
+        """
+        Upload PDFs and display them in the widget.
+
+        Args:
+            files (List[str]): List of file paths to upload.
+        """
         worker = PdfToIcon(self.file_list, files)
 
-        loading = QProgressDialog("Loading...", None, 0, 0)
+        loading = QProgressDialog("Loading...", None, 0, 0, self)
         loading.setWindowTitle("PDF Reader")
         loading.setCancelButton(None)
         loading.setWindowModality(Qt.WindowModality.ApplicationModal)
@@ -146,8 +181,8 @@ class PyPDFMerger(QWidget):
         while worker.isRunning():
             QApplication.processEvents()
 
-    def save_file(self):
-        # Create a PdfFileWriter object and add the pages from the selected PDF files in the new order
+    def save_file(self) -> None:
+        """Create a PdfFileWriter object and add the pages from the selected PDF files in the new order."""
         writer = PdfWriter()
         for i in range(self.file_list.count()):
             page_item = self.file_list.item(i)

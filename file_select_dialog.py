@@ -33,7 +33,9 @@ class FileSelectDialog(QDialog):
         # Set the starting directory to the user's last directory with fallback home directory
         last_directory = self.settings.value(
             "lastDirectory",
-            QStandardPaths.writableLocation(QStandardPaths.StandardLocation.HomeLocation),
+            QStandardPaths.writableLocation(
+                QStandardPaths.StandardLocation.HomeLocation
+            ),
         )
 
         self.file_dialog.setDirectory(last_directory)
