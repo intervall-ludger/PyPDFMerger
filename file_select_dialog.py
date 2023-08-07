@@ -1,6 +1,7 @@
 import os
+from typing import List, Optional
 
-from PyQt6.QtCore import Qt
+from PyQt6.QtCore import Qt, QStandardPaths, QSettings
 from PyQt6.QtWidgets import (
     QDialog,
     QFileDialog,
@@ -11,11 +12,15 @@ from PyQt6.QtWidgets import (
     QVBoxLayout,
 )
 
-from PyQt6.QtCore import QStandardPaths, QSettings
-
 
 class FileSelectDialog(QDialog):
-    def __init__(self, parent=None):
+    def __init__(self, parent: Optional[QDialog] = None) -> None:
+        """
+        Initialize the FileSelectDialog.
+
+        Args:
+            parent (Optional[QDialog], optional): Parent widget. Defaults to None.
+        """
         super().__init__(parent)
 
         self.settings = QSettings("PyPDFMerger", "FileSelectDialog")
@@ -28,14 +33,10 @@ class FileSelectDialog(QDialog):
         # Set the starting directory to the user's last directory with fallback home directory
         last_directory = self.settings.value(
             "lastDirectory",
-            QStandardPaths.writableLocation(
-                QStandardPaths.StandardLocation.HomeLocation
-            ),
+            QStandardPaths.writableLocation(QStandardPaths.StandardLocation.HomeLocation),
         )
 
         self.file_dialog.setDirectory(last_directory)
-        self.file_dialog.setFileMode(QFileDialog.FileMode.ExistingFiles)
-        self.file_dialog.setNameFilter("PDF Files (*.pdf)")
 
         # Create the widgets
         self.file_list = QListWidget()
@@ -62,12 +63,17 @@ class FileSelectDialog(QDialog):
 
         self.save_last_directory()
 
-    def save_last_directory(self):
+    def save_last_directory(self) -> None:
+        """
+        Save the last directory used in the file dialog to QSettings.
+        """
         directory = self.file_dialog.directory()
         self.settings.setValue("lastDirectory", directory.path())
 
-    def show_file_dialog(self):
-        # Show the file selection dialog
+    def show_file_dialog(self) -> None:
+        """
+        Display the file selection dialog and handle the files selected.
+        """
         if self.file_dialog.exec():
             # Add the selected files to the list
             selected_files = self.file_dialog.selectedFiles()
@@ -78,8 +84,13 @@ class FileSelectDialog(QDialog):
                     item.setData(Qt.ItemDataRole.UserRole, file_path)
                     self.file_list.addItem(item)
 
-    def get_selected_files(self):
-        # Return the selected file paths
+    def get_selected_files(self) -> List[str]:
+        """
+        Retrieve the file paths selected by the user.
+
+        Returns:
+            List[str]: A list of selected file paths.
+        """
         file_paths = []
         for index in range(self.file_list.count()):
             item = self.file_list.item(index)
