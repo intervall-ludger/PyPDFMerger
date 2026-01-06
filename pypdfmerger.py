@@ -56,10 +56,10 @@ class TrashCanDialog(QDialog):
         self.restore_button = QPushButton("Restore")
         self.restore_button.clicked.connect(self.restore_deleted_item)
 
-        self.layout = QVBoxLayout()
-        self.layout.addWidget(self.deleted_items)
-        self.layout.addWidget(self.restore_button)
-        self.setLayout(self.layout)
+        layout = QVBoxLayout()
+        layout.addWidget(self.deleted_items)
+        layout.addWidget(self.restore_button)
+        self.setLayout(layout)
 
         self.deleted_items.setIconSize(QSize(164, 164))
 
@@ -183,10 +183,11 @@ class PyPDFMerger(QWidget):
             QApplication.processEvents()
 
     def save_file(self) -> None:
-        """Create a PdfFileWriter object and add the pages from the selected PDF files in the new order."""
         writer = PdfWriter()
         for i in range(self.file_list.count()):
             page_item = self.file_list.item(i)
+            if not page_item:
+                continue
             file_path, page_num = page_item.data(Qt.ItemDataRole.UserRole)
 
             with open(file_path, "rb") as f:

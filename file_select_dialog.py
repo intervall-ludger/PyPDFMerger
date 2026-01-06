@@ -10,17 +10,12 @@ from PyQt6.QtWidgets import (
     QListWidgetItem,
     QPushButton,
     QVBoxLayout,
+    QWidget,
 )
 
 
 class FileSelectDialog(QDialog):
-    def __init__(self, parent: Optional[QDialog] = None) -> None:
-        """
-        Initialize the FileSelectDialog.
-
-        Args:
-            parent (Optional[QDialog], optional): Parent widget. Defaults to None.
-        """
+    def __init__(self, parent: Optional[QWidget] = None) -> None:
         super().__init__(parent)
 
         self.settings = QSettings("PyPDFMerger", "FileSelectDialog")
@@ -87,14 +82,9 @@ class FileSelectDialog(QDialog):
                     self.file_list.addItem(item)
 
     def get_selected_files(self) -> List[str]:
-        """
-        Retrieve the file paths selected by the user.
-
-        Returns:
-            List[str]: A list of selected file paths.
-        """
-        file_paths = []
+        file_paths: List[str] = []
         for index in range(self.file_list.count()):
             item = self.file_list.item(index)
-            file_paths.append(item.data(Qt.ItemDataRole.UserRole))
+            if item:
+                file_paths.append(item.data(Qt.ItemDataRole.UserRole))
         return file_paths

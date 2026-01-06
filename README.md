@@ -4,44 +4,48 @@
 
 ![](/assets/show.gif)
 
-### Getting Started
-To use PDF Merger, you will need to have Python 3 and the following libraries installed:
-- PyQt6
-- PyPDF2
-- pdf2image
+## Getting Started
 
-You can install the required libraries using pip:
+**Requirements:** Python 3.12+
 
-````bash
-pip install PyQt6 PyPDF2 pdf2image pymupdf
-````
+Install dependencies with uv:
 
-or alternative with poetry:
+```bash
+uv sync
+```
 
-````bash
-poetry install
-````
+## Usage
 
-### Usage
-To run PDF Merger, simply run the following command:
+Run the application:
 
-````bash
-python pypdfmerger.py
-````
+```bash
+uv run pypdfmerger.py
+```
 
-or as executable file.
+Or use the standalone executable:
 
-````bash
+```bash
 ./dist/pypdfmerger.exe
-````
-**or use the traditional installer setup under windows.** (see for this below)
+```
 
-Once the application is running, you can add PDF files to the list by clicking the "Add Files" button or dragging and dropping files onto the list. You can rearrange the items in the list by dragging and dropping. The "Trash Can" button opens a dialog box where you can recover deleted items. Once you are ready to merge the PDF files, click the "Save" button and select a destination file for the new PDF.
+The application can also be installed traditionally by running the [InstallerSetup](/Output/PyPDFMergerSetup.exe) and adding **PyPDFMerger** to your programs.
 
-You can download the standalone exe [here](/dist/pypdfmerger.exe).
+### Features
 
-The application can also be installed in the traditional way, by running the [InstallerSetup](/Output/PyPDFMergerSetup.exe) in Output and adding **PyPDFMerger** to your programs. If you want to uninstall it, you can do this directly as with other programs. 
+- Add PDF files via "Add Files" button or drag-and-drop
+- Rearrange items by dragging and dropping
+- Recover deleted items via "Trash Can" button
+- Select specific pages from each PDF
+- Merge and save to a new PDF file
 
-### Licence
+## Build
 
-The application is available under the MIT License and contributions are welcome.
+To build the executable:
+
+```bash
+uv run --with pyinstaller pyinstaller pypdfmerger.py --onefile --windowed
+```
+
+## Licence
+
+MIT License - contributions are welcome.

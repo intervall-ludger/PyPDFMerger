@@ -32,19 +32,12 @@ def get_pdf_thumbnail(file_path: str, page_num: int = 0) -> QPixmap:
 
 
 def get_start_size() -> Tuple[int, int, int, int]:
-    """
-    Get the start size for the application window.
-
-    Returns:
-        Tuple[int, int, int, int]: A tuple containing the x, y, width, and height of the window.
-    """
     monitor_info = screeninfo.get_monitors()[0]
-    return (
-        100,
-        min(100, int(0.9 * monitor_info.height)),
-        min(400, monitor_info.width),
-        min(800, int(0.9 * monitor_info.height)),
-    )
+    width = min(400, monitor_info.width)
+    height = min(800, int(0.9 * monitor_info.height))
+    x = max(0, monitor_info.x + 100)
+    y = max(0, monitor_info.y + 100)
+    return (x, y, width, height)
 
 
 def get_page_size() -> Tuple[int, int]:

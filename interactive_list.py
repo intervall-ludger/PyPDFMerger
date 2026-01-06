@@ -1,34 +1,29 @@
-from pathlib import Path
-import sys
+from __future__ import annotations
 import os
-from PyQt6.QtCore import QByteArray, QBuffer, QIODevice
-from PyQt6.QtCore import QSize, Qt
-from PyQt6.QtGui import QDropEvent, QDragEnterEvent
-from PyQt6.QtWidgets import QListWidget, QAbstractItemView, QListWidgetItem
-from PyQt6.QtCore import Qt, QRect
-from PyQt6.QtGui import QPainter, QPixmap, QFont, QFontMetrics
-from typing import List
+import sys
+from typing import TYPE_CHECKING, List, Optional
+
+from PyQt6.QtCore import QByteArray, QBuffer, QIODevice, QRect, QSize, Qt
+from PyQt6.QtGui import QDragEnterEvent, QDropEvent, QFont, QFontMetrics, QPainter, QPaintEvent, QPixmap
+from PyQt6.QtWidgets import QAbstractItemView, QListWidget, QListWidgetItem, QWidget
+
 from utils import get_page_size
+
+if TYPE_CHECKING:
+    from pypdfmerger import PyPDFMerger
 
 
 class InteractiveQListDragAndDrop(QListWidget):
-    def __init__(self, parent=None, main_window=None):
-        """
-        Initialize an InteractiveQListDragAndDrop instance.
-
-        Args:
-            parent (QWidget): The parent widget. Defaults to None.
-            main_window (Optional[QWidget]): The main window widget. Defaults to None.
-        """
+    def __init__(
+        self,
+        parent: Optional[QWidget] = None,
+        main_window: Optional[PyPDFMerger] = None,
+    ):
         super().__init__(parent)
         self.setDragEnabled(True)
         self.setAcceptDrops(True)
-        self.setDragDropMode(
-            QAbstractItemView.DragDropMode.InternalMove
-        )  # Enable drag and drop reordering
-        self.setMovement(
-            QListWidget.Movement.Snap
-        )  # Set the movement to snap, so the items snap to grid
+        self.setDragDropMode(QAbstractItemView.DragDropMode.InternalMove)
+        self.setMovement(QListWidget.Movement.Snap)
 
         self.setIconSize(QSize(164, 164))
         self.setResizeMode(QListWidget.ResizeMode.Adjust)
@@ -36,7 +31,9 @@ class InteractiveQListDragAndDrop(QListWidget):
         self.main_window = main_window
 
         self.itemEntered.connect(self.show_preview)
-        self.viewport().setAttribute(Qt.WidgetAttribute.WA_Hover, True)
+        viewport = self.viewport()
+        if viewport:
+            viewport.setAttribute(Qt.WidgetAttribute.WA_Hover, True)
         self.setMouseTracking(True)
 
         if getattr(sys, 'frozen', False) and hasattr(sys, '_MEIPASS'):
@@ -47,13 +44,19 @@ class InteractiveQListDragAndDrop(QListWidget):
         originalPixmap = QPixmap(os.path.join(bundle_dir, 'drag_and_drop.png')) # Load the icon you want to display
         self.emptyListPixmap = originalPixmap.scaled(QSize(100, 100), Qt.AspectRatioMode.KeepAspectRatio)
 
-    def paintEvent(self, event):
-        super().paintEvent(event)
+    def paintEvent(self, e: Optional[QPaintEvent]) -> None:
+        super().paintEvent(e)
 
-        if not self.count():  # If the list is empty
-            qp = QPainter(self.viewport())
+        if not self.count():
+            viewport = self.viewport()
+            if not viewport:
+                return
+            qp = QPainter(viewport)
             qp.setPen(Qt.GlobalColor.lightGray)
-            qp.setFont(QFont('Sans', 12, QFont.Weight.Bold))
+            font = QFont()
+            font.setPointSize(12)
+            font.setWeight(QFont.Weight.Bold)
+            qp.setFont(font)
 
             # Draw the icon in the middle of the widget
             pixmap_rect = QRect(0, 0, self.emptyListPixmap.width(), self.emptyListPixmap.height())
@@ -94,40 +97,32 @@ class InteractiveQListDragAndDrop(QListWidget):
         else:
             item.setToolTip("")
 
-    def dragEnterEvent(self, event: QDragEnterEvent):
-        """
-        Event triggered when a drag operation enters the widget.
-
-        Args:
-            event (QDragEnterEvent): The drag enter event.
-        """
-        if event.mimeData().hasUrls():
-            event.accept()
+    def dragEnterEvent(self, e: Optional[QDragEnterEvent]) -> None:
+        if e is None:
+            return
+        mime_data = e.mimeData()
+        if mime_data and mime_data.hasUrls():
+            e.accept()
         else:
-            super().dragEnterEvent(event)
+            super().dragEnterEvent(e)
 
-    def dropEvent(self, event: QDropEvent):
-        """
-        Event triggered when a drop operation occurs on the widget.
-
-        Args:
-            event (QDropEvent): The drop event.
-        """
-        if event.mimeData().hasUrls():
-            urls = event.mimeData().urls()
+    def dropEvent(self, e: Optional[QDropEvent]) -> None:
+        if e is None:
+            return
+        mime_data = e.mimeData()
+        if mime_data and mime_data.hasUrls():
+            urls = mime_data.urls()
             pdf_files: List[str] = []
             for url in urls:
-                file_path = Path(url.path()[1:])
-                if file_path.suffix == ".pdf":
-                    pdf_files.append(file_path.as_posix())
-            if len(pdf_files) > 0:
+                local_path = url.toLocalFile()
+                if local_path.lower().endswith(".pdf"):
+                    pdf_files.append(local_path)
+            if pdf_files and self.main_window:
                 self.main_window.upload_pdfs(pdf_files)
-
         else:
-            super().dropEvent(event)
-
-            if event.source() == self:
-                drop_index = self.indexAt(event.position().toPoint())
+            super().dropEvent(e)
+            if e.source() == self:
+                drop_index = self.indexAt(e.position().toPoint())
                 if drop_index.isValid():
                     item = self.takeItem(self.currentRow())
                     self.insertItem(drop_index.row(), item)

@@ -1,0 +1,4 @@
+[rules]
+# PyQt6 stubs have inconsistent parameter names across class hierarchies
+# This causes false positives for method overrides
+invalid-method-override = "warn"
