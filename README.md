@@ -40,11 +40,22 @@ The application can also be installed traditionally by running the [InstallerSet
 
 ## Build
 
-To build the executable:
+To build the executable locally:
 
 ```bash
 uv run --with pyinstaller pyinstaller pypdfmerger.py --onefile --windowed
 ```
+
+## Release
+
+To create a new release, push a version tag:
+
+```bash
+git tag v1.3.0
+git push origin v1.3.0
+```
+
+This triggers the GitHub Actions workflow which builds executables for Linux, Windows and macOS and attaches them to the release.
 
 ## Licence
 

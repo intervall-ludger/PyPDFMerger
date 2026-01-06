@@ -1,9 +1,9 @@
 import sys
-from typing import List, Optional
+from typing import Optional
 
 from PyPDF2 import PdfReader, PdfWriter
 from PyQt6.QtCore import Qt, QSize, pyqtSignal
-from PyQt6.QtGui import QKeySequence, QIcon, QShortcut
+from PyQt6.QtGui import QKeySequence, QIcon, QShortcut, QPixmap
 from PyQt6.QtWidgets import (
     QApplication,
     QProgressDialog,
@@ -16,136 +16,235 @@ from PyQt6.QtWidgets import (
     QVBoxLayout,
     QPushButton,
     QListWidgetItem,
+    QSizePolicy,
+    QLabel,
 )
 
 from file_select_dialog import FileSelectDialog
 from interactive_list import InteractiveQListDragAndDrop
 from pdf_to_icon import PdfToIcon
-from utils import get_start_size
+from utils import get_start_size, get_page_size
+
+STYLE = """
+QWidget {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    font-size: 13px;
+}
+
+QPushButton {
+    background-color: #f0f0f0;
+    border: 1px solid #d0d0d0;
+    border-radius: 6px;
+    padding: 8px 16px;
+    min-height: 20px;
+}
+
+QPushButton:hover {
+    background-color: #e5e5e5;
+    border-color: #c0c0c0;
+}
+
+QPushButton:pressed {
+    background-color: #d5d5d5;
+}
+
+QPushButton#primary {
+    background-color: #0066cc;
+    border: none;
+    color: white;
+}
+
+QPushButton#primary:hover {
+    background-color: #0055aa;
+}
+
+QPushButton#primary:pressed {
+    background-color: #004488;
+}
+
+QListWidget {
+    background-color: #fafafa;
+    border: 1px solid #e0e0e0;
+    border-radius: 8px;
+    padding: 8px;
+}
+
+QListWidget::item {
+    background-color: white;
+    border: 1px solid #e8e8e8;
+    border-radius: 6px;
+    padding: 6px;
+    margin: 3px;
+}
+
+QListWidget::item:selected {
+    background-color: #e3f2fd;
+    border: 2px solid #42a5f5;
+}
+
+QListWidget::item:hover {
+    background-color: #f8f9fa;
+    border-color: #bdbdbd;
+}
+
+QLabel#hint {
+    color: #888888;
+    font-size: 11px;
+}
+
+QDialog {
+    background-color: #ffffff;
+}
+"""
+
+
+class PreviewDialog(QDialog):
+    def __init__(self, pixmap: QPixmap, title: str, parent: Optional[QWidget] = None) -> None:
+        super().__init__(parent)
+        self.setWindowTitle(title)
+
+        label = QLabel()
+        label.setPixmap(pixmap)
+        label.setAlignment(Qt.AlignmentFlag.AlignCenter)
+
+        layout = QVBoxLayout()
+        layout.setContentsMargins(12, 12, 12, 12)
+        layout.addWidget(label)
+        self.setLayout(layout)
+        self.adjustSize()
 
 
 class TrashCanDialog(QDialog):
-    """
-    A dialog representing a trash can where deleted items are temporarily stored.
-    Provides the ability to restore deleted items.
-    """
-
-    # item_restored: pyqtSignal[QListWidgetItem] = pyqtSignal(QListWidgetItem)
     item_restored = pyqtSignal(QListWidgetItem)
 
     def __init__(
-        self, deleted_items: List[QListWidgetItem], parent: Optional[QWidget] = None
+        self, deleted_items: list[QListWidgetItem], parent: Optional[QWidget] = None
     ) -> None:
-        """
-        Initialize the TrashCanDialog.
+        super().__init__(parent)
+        self.setWindowTitle("Deleted Pages")
+        self.setMinimumSize(300, 400)
 
-        Args:
-            deleted_items (List[QListWidgetItem]): List of items that were deleted.
-            parent (Optional[QWidget], optional): Parent widget. Defaults to None.
-        """
-        super(TrashCanDialog, self).__init__(parent)
-
-        self.setWindowTitle("TrashCan")
-        geometry = get_start_size()
-        self.setGeometry(geometry[0] + 400, geometry[1], geometry[2], geometry[3])
-
-        self.deleted_items = QListWidget()
+        self.deleted_items_list = QListWidget()
+        self.deleted_items_list.setIconSize(QSize(100, 100))
         for item in deleted_items:
-            self.deleted_items.addItem(item.clone())
+            self.deleted_items_list.addItem(item.clone())
 
         self.restore_button = QPushButton("Restore")
         self.restore_button.clicked.connect(self.restore_deleted_item)
+        self.restore_button.setEnabled(False)
+        self.deleted_items_list.itemSelectionChanged.connect(self._update_button_state)
 
         layout = QVBoxLayout()
-        layout.addWidget(self.deleted_items)
+        layout.setContentsMargins(16, 16, 16, 16)
+        layout.setSpacing(12)
+        layout.addWidget(self.deleted_items_list)
         layout.addWidget(self.restore_button)
         self.setLayout(layout)
 
-        self.deleted_items.setIconSize(QSize(164, 164))
+    def _update_button_state(self) -> None:
+        self.restore_button.setEnabled(bool(self.deleted_items_list.currentItem()))
 
     def restore_deleted_item(self) -> None:
-        """
-        Restore the selected deleted item and close the dialog.
-        """
-        selected_item = self.deleted_items.takeItem(self.deleted_items.currentRow())
+        selected_item = self.deleted_items_list.takeItem(
+            self.deleted_items_list.currentRow()
+        )
         if selected_item:
             self.item_restored.emit(selected_item.clone())
             self.close()
 
 
 class PyPDFMerger(QWidget):
-    """Main widget for the Py PDF Merger application."""
-
     def __init__(self) -> None:
-        """Initialize the PyPDFMerger widget."""
         super().__init__()
+        self.setWindowTitle("PDF Merger")
+        x, y, width, height = get_start_size()
+        self.setGeometry(x, y, width, height)
+        self.setMinimumSize(400, 500)
 
-        # Initialize the main window
-        self.setWindowTitle("Py PDF Merger")
+        self.deleted_items: list[QListWidgetItem] = []
+        self._setup_ui()
+        self._setup_shortcuts()
 
-        geometry = get_start_size()
-        self.setGeometry(geometry[0], geometry[1], geometry[2], geometry[3])
-
-        # Create the widgets
+    def _setup_ui(self) -> None:
         self.file_list = InteractiveQListDragAndDrop(main_window=self)
+        self.file_list.setSizePolicy(QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Expanding)
+        self.file_list.itemDoubleClicked.connect(self._on_item_double_clicked)
 
-        # Define a list to store the deleted items
-        self.deleted_items = []
+        model = self.file_list.model()
+        if model:
+            model.rowsInserted.connect(self._update_item_numbers)
+            model.rowsRemoved.connect(self._update_item_numbers)
+            model.rowsMoved.connect(self._update_item_numbers)
 
-        self.remove_file_button = QPushButton("Delete")
-        self.trashcan_button = QPushButton("Trash")
-        self.save_button = QPushButton("Save")
+        hint_label = QLabel("Drag to reorder")
+        hint_label.setObjectName("hint")
+        hint_label.setAlignment(Qt.AlignmentFlag.AlignCenter)
 
-        self.add_files_button = QPushButton("Add Files")
-        self.add_files_button.clicked.connect(self.show_file_select_dialog)
+        self.add_button = QPushButton("Add")
+        self.delete_button = QPushButton("Delete")
+        self.trash_button = QPushButton("Trash")
+        self.save_button = QPushButton("Save PDF")
+        self.save_button.setObjectName("primary")
 
-        self.remove_file_button.clicked.connect(self.remove_selected_item)
-        self.trashcan_button.clicked.connect(self.show_trashcan_dialog)
+        self.delete_button.setToolTip("Delete or Backspace")
+
+        self.add_button.clicked.connect(self.show_file_select_dialog)
+        self.delete_button.clicked.connect(self.remove_selected_item)
+        self.trash_button.clicked.connect(self.show_trashcan_dialog)
         self.save_button.clicked.connect(self.save_file)
 
-        # Create the layout
-        self.horizontal_layout = QHBoxLayout()
-        self.horizontal_layout.addWidget(self.file_list)
+        button_row = QHBoxLayout()
+        button_row.setSpacing(8)
+        button_row.addWidget(self.add_button)
+        button_row.addWidget(self.delete_button)
+        button_row.addWidget(self.trash_button)
 
-        self.vertical_layout = QVBoxLayout()
-        self.vertical_layout.addLayout(self.horizontal_layout)
-        self.vertical_layout.addWidget(self.add_files_button)
-        self.vertical_layout.addWidget(self.remove_file_button)
-        self.vertical_layout.addWidget(self.trashcan_button)
-        self.vertical_layout.addWidget(self.save_button)
+        main_layout = QVBoxLayout()
+        main_layout.setContentsMargins(16, 16, 16, 16)
+        main_layout.setSpacing(8)
+        main_layout.addWidget(self.file_list, 1)
+        main_layout.addWidget(hint_label)
+        main_layout.addSpacing(4)
+        main_layout.addLayout(button_row)
+        main_layout.addWidget(self.save_button)
 
-        # Add a tooltip to the remove_file_button
-        self.remove_file_button.setToolTip(
-            "Press the 'Delete' key or click this button to remove an item."
-        )
+        self.setLayout(main_layout)
 
-        # Add a shortcut for the delete key
-        self.delete_shortcut = QShortcut(QKeySequence(Qt.Key.Key_Delete), self)
-        self.delete_shortcut.activated.connect(self.remove_selected_item)
+    def _update_item_numbers(self) -> None:
+        for i in range(self.file_list.count()):
+            item = self.file_list.item(i)
+            if item:
+                data = item.data(Qt.ItemDataRole.UserRole)
+                if data:
+                    file_path, page_num = data
+                    filename = file_path.split("/")[-1].split("\\")[-1]
+                    item.setText(f"{i + 1}. {filename}\nPage {page_num + 1}")
 
-        # Set the main layout
-        self.setLayout(self.vertical_layout)
+    def _setup_shortcuts(self) -> None:
+        delete_shortcut = QShortcut(QKeySequence(Qt.Key.Key_Delete), self)
+        delete_shortcut.activated.connect(self.remove_selected_item)
+
+        backspace_shortcut = QShortcut(QKeySequence(Qt.Key.Key_Backspace), self)
+        backspace_shortcut.activated.connect(self.remove_selected_item)
+
+    def _on_item_double_clicked(self, item: QListWidgetItem) -> None:
+        if item.icon():
+            width, height = get_page_size()
+            pixmap = item.icon().pixmap(QSize(width, height))
+            dialog = PreviewDialog(pixmap, "Page Preview", self)
+            dialog.exec()
 
     def remove_selected_item(self) -> None:
-        """Remove the selected item from the file list."""
         selected_item = self.file_list.takeItem(self.file_list.currentRow())
         if selected_item:
             self.deleted_items.append(selected_item)
 
     def show_trashcan_dialog(self) -> None:
-        """Open the trash can dialog to view and potentially restore deleted items."""
-        self.trashcan_dialog = TrashCanDialog(self.deleted_items, self)
-        self.trashcan_dialog.item_restored.connect(self.restore_deleted_item)
-        self.trashcan_dialog.exec()
+        dialog = TrashCanDialog(self.deleted_items, self)
+        dialog.item_restored.connect(self.restore_deleted_item)
+        dialog.exec()
 
-    def restore_deleted_item(self, item) -> None:
-        """
-        Restore a deleted item to the file list.
-
-        Args:
-            item: The item to restore.
-        """
-        # Search for the item in self.deleted_items by comparing text
+    def restore_deleted_item(self, item: QListWidgetItem) -> None:
         for deleted_item in self.deleted_items:
             if deleted_item.text() == item.text():
                 self.file_list.addItem(deleted_item)
@@ -153,80 +252,72 @@ class PyPDFMerger(QWidget):
                 break
 
     def show_file_select_dialog(self) -> None:
-        """Open the file selection dialog."""
-        file_select_dialog = FileSelectDialog(self)
-        if file_select_dialog.exec():
-            selected_files = file_select_dialog.get_selected_files()
-            self.upload_pdfs(selected_files)
+        dialog = FileSelectDialog(self)
+        if dialog.exec():
+            selected_files = dialog.get_selected_files()
+            if selected_files:
+                self.upload_pdfs(selected_files)
 
-    def upload_pdfs(self, files: List[str]) -> None:
-        """
-        Upload PDFs and display them in the widget.
+    def upload_pdfs(self, files: list[str]) -> None:
+        if not files:
+            return
 
-        Args:
-            files (List[str]): List of file paths to upload.
-        """
         worker = PdfToIcon(self.file_list, files)
 
-        loading = QProgressDialog("Loading...", None, 0, 0, self)
-        loading.setWindowTitle("PDF Reader")
-        loading.setCancelButton(None)
-        loading.setWindowModality(Qt.WindowModality.ApplicationModal)
+        progress = QProgressDialog("Loading PDFs...", None, 0, 0, self)
+        progress.setWindowTitle("Loading")
+        progress.setCancelButton(None)
+        progress.setWindowModality(Qt.WindowModality.ApplicationModal)
+        progress.setMinimumDuration(0)
 
-        worker.finished.connect(loading.close)
-
-        loading.show()
-
+        worker.finished.connect(progress.close)
+        progress.show()
         worker.start()
 
         while worker.isRunning():
             QApplication.processEvents()
 
     def save_file(self) -> None:
+        if self.file_list.count() == 0:
+            QMessageBox.warning(self, "PDF Merger", "No pages to save.")
+            return
+
         writer = PdfWriter()
         for i in range(self.file_list.count()):
             page_item = self.file_list.item(i)
             if not page_item:
                 continue
             file_path, page_num = page_item.data(Qt.ItemDataRole.UserRole)
-
             with open(file_path, "rb") as f:
                 reader = PdfReader(f)
-                page = reader.pages[page_num]
-                writer.add_page(page)
+                writer.add_page(reader.pages[page_num])
 
-        # Open a file dialog to select a destination file for the new PDF
-        file_dialog = QFileDialog(self)
-        file_dialog.setNameFilter("PDF files (*.pdf)")
-        file_dialog.setAcceptMode(QFileDialog.AcceptMode.AcceptSave)
-        file_dialog.setDefaultSuffix("pdf")
-        file_dialog.setOption(QFileDialog.Option.DontUseNativeDialog, True)
-        file_dialog.setFileMode(QFileDialog.FileMode.AnyFile)
-        if file_dialog.exec():
-            # Get the selected file path and extension
-            file_path = file_dialog.selectedFiles()[0]
-            if not file_path.lower().endswith(".pdf"):
-                file_path += ".pdf"
+        file_path, _ = QFileDialog.getSaveFileName(
+            self, "Save PDF", "", "PDF Files (*.pdf)"
+        )
+        if not file_path:
+            return
 
-            # Write the new PDF file
-            try:
-                with open(file_path, "wb") as f:
-                    writer.write(f)
-                QMessageBox.information(
-                    self, "PDF Merger", "PDF file successfully saved."
-                )
-            except:
-                QMessageBox.critical(
-                    self, "PDF Merger", "Error occurred while saving the PDF file."
-                )
+        if not file_path.lower().endswith(".pdf"):
+            file_path += ".pdf"
+
+        try:
+            with open(file_path, "wb") as f:
+                writer.write(f)
+            QMessageBox.information(self, "PDF Merger", "PDF saved successfully.")
+        except OSError as e:
+            QMessageBox.critical(self, "PDF Merger", f"Could not save file:\n{e}")
 
 
-def main():
+def main() -> None:
     app = QApplication(sys.argv)
     app.setStyle("Fusion")
+    app.setStyleSheet(STYLE)
     app.setWindowIcon(QIcon("icon.ico"))
-    pdf_merger = PyPDFMerger()
-    pdf_merger.show()
+
+    window = PyPDFMerger()
+    window.show()
+
     sys.exit(app.exec())
 
 
