@@ -1,5 +1,7 @@
 # PDF Merger
 
+**▶ [Open the app](https://intervall-ludger.github.io/PDFMerger/)**
+
 A PDF merger that runs **entirely in your browser**. Add PDFs, reorder pages by
 drag-and-drop, drop the ones you don't need, and merge everything into a single
 file. No file is ever uploaded — all processing happens locally, which is what
