@@ -1,3 +1,15 @@
+# Node / Vite (web app)
+node_modules/
+dist/
+dist-ssr/
+*.local
+
+# Playwright
+/test-results/
+/playwright-report/
+/playwright/.cache/
+
+# --- legacy Python desktop app (see legacy/) ---
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]
@@ -14,8 +26,8 @@ dist/pypdfmerger
 downloads/
 eggs/
 .eggs/
-lib/
-lib64/
+/legacy/lib/
+/legacy/lib64/
 parts/
 sdist/
 var/
@@ -127,3 +139,6 @@ dmypy.json
 
 # Pyre type checker
 .pyre/
+
+# TypeScript incremental build info
+*.tsbuildinfo

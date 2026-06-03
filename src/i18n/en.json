@@ -1,0 +1,20 @@
+{
+  "title": "PDF Merger",
+  "subtitle": "Merge PDFs in your browser. Nothing is uploaded.",
+  "dropHint": "Drop PDF files here or",
+  "addFiles": "Add files",
+  "reorderHint": "Drag pages to reorder",
+  "page": "Page",
+  "delete": "Delete",
+  "restore": "Restore",
+  "trash": "Trash",
+  "trashEmpty": "No deleted pages.",
+  "trashTitle": "Deleted pages",
+  "close": "Close",
+  "save": "Save PDF",
+  "merging": "Merging…",
+  "loading": "Loading…",
+  "empty": "No pages yet. Add a PDF to get started.",
+  "errorLoad": "Could not read PDF: {name}",
+  "errorSave": "Could not create the merged PDF."
+}

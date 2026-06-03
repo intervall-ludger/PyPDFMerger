@@ -1,61 +1,75 @@
-# PyPDFMerger - A PyQt6 Application for Merging PDF Files
+# PDF Merger
 
-`PyPDFMerger` is a simple PyQt6 application for merging multiple PDF files into a single PDF file. It provides drag-and-drop functionality for adding PDF files to the list and reordering them. Users can select specific pages from each PDF to include in the final output file.
+A PDF merger that runs **entirely in your browser**. Add PDFs, reorder pages by
+drag-and-drop, drop the ones you don't need, and merge everything into a single
+file. No file is ever uploaded — all processing happens locally, which is what
+makes it safe to host as a static site on GitHub Pages.
 
-![](/assets/show.gif)
+![PDF Merger](assets/merger.png)
 
-## Getting Started
+Built with React + TypeScript, [pdf.js](https://mozilla.github.io/pdf.js/) for
+page thumbnails and [pdf-lib](https://pdf-lib.js.org/) for merging. The UI follows
+a minimal Bauhaus aesthetic (primary colours, hard edges, grotesque type) and the
+entire stylesheet is a single short `src/style.css`.
 
-**Requirements:** Python 3.12+
+## Features
 
-Install dependencies with uv:
+- Add PDFs via button or drag-and-drop
+- One thumbnail per page, numbered in output order
+- Reorder pages by dragging
+- Delete pages and restore them from the trash
+- Merge and download as a single PDF
+- German / English UI, easy to extend with more languages
 
-```bash
-uv sync
-```
+## Getting started
 
-## Usage
-
-Run the application:
-
-```bash
-uv run pypdfmerger.py
-```
-
-Or use the standalone executable:
-
-```bash
-./dist/pypdfmerger.exe
-```
-
-The application can also be installed traditionally by running the [InstallerSetup](/Output/PyPDFMergerSetup.exe) and adding **PyPDFMerger** to your programs.
-
-### Features
-
-- Add PDF files via "Add Files" button or drag-and-drop
-- Rearrange items by dragging and dropping
-- Recover deleted items via "Trash Can" button
-- Select specific pages from each PDF
-- Merge and save to a new PDF file
-
-## Build
-
-To build the executable locally:
+Requires Node 18+.
 
 ```bash
-uv run --with pyinstaller pyinstaller pypdfmerger.py --onefile --windowed
+npm install
+npm run dev      # start the dev server at http://localhost:5173
+npm run build    # production build into dist/
 ```
 
-## Release
+Some sample PDFs to play with live in [`examples/`](examples/); regenerate them
+with `node examples/make-examples.mjs`.
 
-To create a new release, push a version tag:
+## Tests
 
 ```bash
-git tag v1.3.0
-git push origin v1.3.0
+npm run typecheck     # tsc
+npm test              # unit & component tests (Vitest + Testing Library)
+npm run test:e2e      # end-to-end tests in a real browser (Playwright)
 ```
 
-This triggers the GitHub Actions workflow which builds executables for Linux, Windows and macOS and attaches them to the release.
+E2E fixtures are generated with `node e2e/make-fixtures.mjs` (committed PDFs).
+
+## Adding a language
+
+The German interface is just another JSON file:
+
+![German interface](assets/merger-de.png)
+
+1. Copy `src/i18n/en.json` to e.g. `src/i18n/fr.json` and translate the values.
+2. Register it in `src/i18n/index.tsx`:
+
+   ```ts
+   import fr from "./fr.json";
+   export const languages = { en, de, fr } as const;
+   ```
+
+The language switch and browser-language detection pick it up automatically.
+
+## Deployment
+
+Pushing to `main` runs `.github/workflows/deploy.yml`, which builds the app and
+publishes `dist/` to GitHub Pages. Enable Pages once via the "GitHub Actions"
+source in the repository settings.
+
+## Legacy desktop app
+
+The original PyQt6 desktop version lives in [`legacy/`](legacy/) and is no longer
+maintained.
 
 ## Licence
 

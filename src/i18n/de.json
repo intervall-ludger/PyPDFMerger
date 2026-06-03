@@ -1,0 +1,20 @@
+{
+  "title": "PDF Merger",
+  "subtitle": "PDFs im Browser zusammenführen. Nichts wird hochgeladen.",
+  "dropHint": "PDF-Dateien hierher ziehen oder",
+  "addFiles": "Dateien hinzufügen",
+  "reorderHint": "Seiten zum Sortieren ziehen",
+  "page": "Seite",
+  "delete": "Löschen",
+  "restore": "Wiederherstellen",
+  "trash": "Papierkorb",
+  "trashEmpty": "Keine gelöschten Seiten.",
+  "trashTitle": "Gelöschte Seiten",
+  "close": "Schließen",
+  "save": "PDF speichern",
+  "merging": "Wird zusammengeführt…",
+  "loading": "Wird geladen…",
+  "empty": "Noch keine Seiten. Füge ein PDF hinzu.",
+  "errorLoad": "PDF konnte nicht gelesen werden: {name}",
+  "errorSave": "Das zusammengeführte PDF konnte nicht erstellt werden."
+}
