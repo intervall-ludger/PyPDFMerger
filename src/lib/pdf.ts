@@ -43,19 +43,22 @@ export async function mergePages(
   pages: PdfPage[],
   bytesByFile: Map<string, Uint8Array>,
 ): Promise<Uint8Array> {
-  const out = await PDFDocument.create();
-  const sources = new Map<string, PDFDocument>();
+  const mergedDoc = await PDFDocument.create();
+  const sourceDocs = new Map<string, PDFDocument>();
 
   for (const page of pages) {
-    let source = sources.get(page.fileId);
-    if (!source) {
+    let sourceDoc = sourceDocs.get(page.fileId);
+    if (!sourceDoc) {
       const bytes = bytesByFile.get(page.fileId);
-      if (!bytes) continue;
-      source = await PDFDocument.load(bytes);
-      sources.set(page.fileId, source);
+      if (!bytes) {
+        console.warn(`No bytes cached for file ${page.fileId}, skipping page ${page.pageIndex}`);
+        continue;
+      }
+      sourceDoc = await PDFDocument.load(bytes);
+      sourceDocs.set(page.fileId, sourceDoc);
     }
-    const [copied] = await out.copyPages(source, [page.pageIndex]);
-    out.addPage(copied);
+    const [copied] = await mergedDoc.copyPages(sourceDoc, [page.pageIndex]);
+    mergedDoc.addPage(copied);
   }
-  return out.save();
+  return mergedDoc.save();
 }

@@ -25,7 +25,7 @@ entire stylesheet is a single short `src/style.css`.
 
 ## Getting started
 
-Requires Node 18+.
+Requires Node 20+.
 
 ```bash
 npm install

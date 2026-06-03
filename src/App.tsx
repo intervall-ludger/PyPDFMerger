@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useReducer, useRef, useState } from "react";
 import { useI18n } from "./i18n";
 import { loadPdf, mergePages } from "./lib/pdf";
-import { downloadBytes } from "./lib/reorder";
+import { downloadBytes } from "./lib/download";
 import { pagesReducer } from "./lib/pagesReducer";
 import LangSwitch from "./components/LangSwitch";
 import DropZone from "./components/DropZone";
@@ -20,6 +20,7 @@ export default function App() {
   const addFiles = useCallback(async (files: File[]) => {
     setBusy(true);
     setError(null);
+    const failed: string[] = [];
     try {
       for (const file of files) {
         try {
@@ -27,12 +28,13 @@ export default function App() {
           bytesByFile.current.set(fileId, bytes);
           dispatch({ type: "add", pages: newPages });
         } catch {
-          setError(t("errorLoad", { name: file.name }));
+          failed.push(file.name);
         }
       }
     } finally {
       setBusy(false);
     }
+    if (failed.length) setError(t("errorLoad", { name: failed.join(", ") }));
   }, [t]);
 
   const removePage = useCallback((id: string) => {
@@ -64,6 +66,10 @@ export default function App() {
 
   useEffect(() => {
     function onKey(e: KeyboardEvent) {
+      const el = document.activeElement as HTMLElement | null;
+      if (el && (el.tagName === "INPUT" || el.tagName === "TEXTAREA" || el.isContentEditable)) {
+        return;
+      }
       if ((e.key === "Delete" || e.key === "Backspace") && selectedId) {
         removePage(selectedId);
       }

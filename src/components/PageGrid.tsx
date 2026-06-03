@@ -30,6 +30,7 @@ export default function PageGrid({ pages, selectedId, onSelect, onRemove, onMove
           aria-label={`${page.fileName} ${t("page")} ${page.pageIndex + 1}`}
           onClick={() => onSelect(page.id)}
           onDragStart={() => setDragIndex(index)}
+          onDragEnd={() => setDragIndex(null)}
           onDragOver={(e) => e.preventDefault()}
           onDrop={(e) => onDrop(e, index)}
         >

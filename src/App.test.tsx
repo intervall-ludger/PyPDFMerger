@@ -12,10 +12,7 @@ const { loadPdf, mergePages, downloadBytes } = vi.hoisted(() => ({
 }));
 
 vi.mock("./lib/pdf", () => ({ loadPdf, mergePages }));
-vi.mock("./lib/reorder", async (orig) => ({
-  ...(await orig<typeof import("./lib/reorder")>()),
-  downloadBytes,
-}));
+vi.mock("./lib/download", () => ({ downloadBytes }));
 
 function makePages(fileId: string, name: string, count: number): PdfPage[] {
   return Array.from({ length: count }, (_, i) => ({
